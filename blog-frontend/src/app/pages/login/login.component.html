@@ -1,0 +1,38 @@
+<div class="login-container">
+  <button mat-icon-button class="back-button" routerLink="/view-all">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <mat-card class="login-card">
+    <mat-card-title>Đăng nhập</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Tên người dùng</mat-label>
+          <input matInput formControlName="username">
+          <mat-error *ngIf="loginForm.get('username')?.hasError('required') && loginForm.get('username')?.touched">
+            Vui lòng nhập tên người dùng
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Mật khẩu</mat-label>
+          <input matInput type="password" formControlName="password">
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">
+            Vui lòng nhập mật khẩu
+          </mat-error>
+        </mat-form-field>
+
+        <div class="error-message" *ngIf="errorMsg">
+          {{ errorMsg }}
+        </div>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">Đăng nhập</button>
+      </form>
+      <div class="footer-links">
+        <p class="register-link">
+          Chưa có tài khoản? <a routerLink="/register">Đăng ký ngay</a>
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

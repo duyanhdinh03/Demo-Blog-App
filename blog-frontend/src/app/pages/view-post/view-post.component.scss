@@ -1,0 +1,104 @@
+.card-container {
+  margin: 16px auto;
+  max-width: 60%;
+  padding-bottom: 30px;
+}
+
+mat-card {
+  padding: 24px;
+  background-color: var(--card-background);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+mat-card-header {
+  mat-card-title {
+    font-family: 'Merriweather', serif;
+    font-size: 24px;
+    color: var(--card-text);
+  }
+
+  mat-card-subtitle {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    color: var(--card-text);
+  }
+}
+
+.example-header-image {
+  background-image: url('https://randomuser.me/api/portraits/men/32.jpg');
+  background-size: cover;
+}
+
+mat-card-content {
+  margin-top: 10px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  color: var(--card-text);
+  line-height: 1.6;
+}
+
+mat-chip-listbox {
+  margin: 10px 0;
+
+  mat-chip {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--secondary-color);
+    color: var(--text-white);
+  }
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.action-item {
+  button {
+    background-color: var(--secondary-color);
+    color: var(--text-white);
+    font-family: 'Roboto', sans-serif;
+
+    &:hover {
+      background-color: var(--primary-color);
+    }
+
+    mat-icon {
+      margin-left: 5px;
+    }
+  }
+}
+
+.comment-card {
+  margin-top: 20px;
+
+  h4 {
+    font-family: 'Merriweather', serif;
+    font-size: 20px;
+    color: var(--card-text);
+    margin-bottom: 20px;
+  }
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+
+  textarea {
+    font-family: 'Roboto', sans-serif;
+    color: var(--card-text);
+    min-height: 60px;
+  }
+}
+
+.img {
+  object-fit: cover;
+}
+
+h3 {
+  font-family: 'Merriweather', serif;
+  font-size: 20px;
+  color: var(--card-text);
+  margin-bottom: 10px;
+}

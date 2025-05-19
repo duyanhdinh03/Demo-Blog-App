@@ -1,0 +1,138 @@
+<div class="container">
+  <!-- Vùng 1: Slider Bài viết nổi bật -->
+  <div class="slider-region featured-region text-center">
+    <h2 class="slider-title">Bài viết nổi bật</h2>
+    <div class="slider-section" *ngIf="featuredSlides.length > 0">
+      <ngb-carousel [interval]="5000" [showNavigationArrows]="true" [showNavigationIndicators]="true">
+        <ng-template ngbSlide *ngFor="let slide of featuredSlides">
+          <div class="slide-container">
+            <div class="row">
+              <div class="col-lg-2 col-md-4 col-sm-6 mb-4" *ngFor="let post of slide">
+                <mat-card class="slider-card">
+                  <mat-card-header>
+                    <img mat-card-avatar [src]="post.avatarUrl || 'https://picsum.photos/40/40'" alt="User Avatar">
+                    <mat-card-title>{{ post.name }}</mat-card-title>
+                    <mat-card-subtitle>Posted by: {{ post.postedBy }}</mat-card-subtitle>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div [innerHTML]="sanitizeContent(post.content) | slice:0:100"></div>
+                    <p>{{ post.tagNames }}</p>
+                    <p>
+                      <span>{{ post.likeCounts ?? 0 }} thích</span> |
+                      <span>{{ post.viewCounts ?? 0 }} lượt xem</span>
+                    </p>
+                  </mat-card-content>
+                  <mat-card-actions>
+                    <button mat-raised-button color="primary" [routerLink]="['/view-post', post.id]">
+                      Xem chi tiết
+                    </button>
+                  </mat-card-actions>
+                </mat-card>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngb-carousel>
+    </div>
+  </div>
+
+  <!-- Vùng 2: Slider Bài viết mới nhất -->
+  <div class="slider-region latest-region text-center">
+    <h2 class="slider-title">Bài viết mới nhất</h2>
+    <div class="slider-section" *ngIf="latestSlides.length > 0">
+      <ngb-carousel [interval]="5000" [showNavigationArrows]="true" [showNavigationIndicators]="true">
+        <ng-template ngbSlide *ngFor="let slide of latestSlides">
+          <div class="slide-container">
+            <div class="row">
+              <div class="col-lg-2 col-md-4 col-sm-6 mb-4" *ngFor="let post of slide">
+                <mat-card class="slider-card">
+                  <mat-card-header>
+                    <img mat-card-avatar [src]="post.avatarUrl || 'https://picsum.photos/40/40'" alt="User Avatar">
+                    <mat-card-title>{{ post.name }}</mat-card-title>
+                    <mat-card-subtitle>Posted by: {{ post.postedBy }}</mat-card-subtitle>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div [innerHTML]="sanitizeContent(post.content) | slice:0:100"></div>
+                    <p>{{ post.tagNames }}</p>
+                    <p>
+                      <span>{{ post.likeCounts ?? 0 }} thích</span> |
+                      <span>{{ post.viewCounts ?? 0 }} lượt xem</span>
+                    </p>
+                  </mat-card-content>
+                  <mat-card-actions>
+                    <button mat-raised-button color="primary" [routerLink]="['/view-post', post.id]">
+                      Xem chi tiết
+                    </button>
+                  </mat-card-actions>
+                </mat-card>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngb-carousel>
+    </div>
+  </div>
+
+  <!-- Vùng 3: Hiển thị bài viết với tags và filter -->
+  <div class="posts-region text-center">
+    <div class="tags-filter-container">
+      <!-- Hiển thị tags -->
+      <div class="tags-section">
+        <mat-chip-listbox>
+          <mat-chip-option *ngFor="let tag of tags" [selectable]="true" [selected]="selectedTag === tag.name"
+            (click)="filterByTag(tag)">
+            {{ tag.name }}
+          </mat-chip-option>
+          <mat-chip-option (click)="clearFilter()" *ngIf="selectedTag">Xóa bộ lọc</mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+
+      <!-- Thanh filter -->
+      <div class="filter-section">
+        <mat-form-field appearance="fill">
+          <mat-label>Sort by</mat-label>
+          <mat-select [(ngModel)]="sortMode" (ngModelChange)="onSortChange()">
+            <mat-option value="newest">Newest</mat-option>
+            <mat-option value="mostLikes">Most Likes</mat-option>
+            <mat-option value="mostViews">Most Views</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Posts Block -->
+    <div class="posts-block" *ngIf="!isLoading">
+      <div *ngIf="allPosts.content.length === 0" class="no-posts">
+        <p>Chưa có bài viết nào.</p>
+      </div>
+      <div class="row">
+        <div class="col-lg-4 col-md-6 col-sm-12 mb-4" *ngFor="let item of allPosts.content">
+          <mat-card class="post-card">
+            <mat-card-header>
+              <img mat-card-avatar [src]="item.avatarUrl || 'https://picsum.photos/40/40'" alt="User Avatar">
+              <mat-card-title>{{ item.name }}</mat-card-title>
+              <mat-card-subtitle>Posted by: {{ item.postedBy }}</mat-card-subtitle>
+              <mat-card-subtitle>{{ item.date | date: 'medium' }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div [innerHTML]="sanitizeContent(item.content) | slice:0:200"></div>
+              <p>{{ item.tagNames }}</p>
+              <p>
+                <span>{{ item.likeCounts ?? 0 }} thích</span> |
+                <span>{{ item.viewCounts ?? 0 }} lượt xem</span>
+              </p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-raised-button color="primary" [routerLink]="['/view-post', item.id]">
+                Xem chi tiết
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+      <mat-paginator [length]="allPosts.totalElements" [pageSize]="pageSize" [pageSizeOptions]="[6, 12, 18]"
+        (page)="onPageChange($event)" [showFirstLastButtons]="true">
+      </mat-paginator>
+    </div>
+  </div>
+</div>

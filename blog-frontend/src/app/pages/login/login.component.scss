@@ -1,0 +1,116 @@
+.login-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-image: url('/assets/img/login.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 20px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+  }
+}
+
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  color: var(--secondary-color);
+  background-color: var(--text-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    color: var(--primary-color);
+    background-color: var(--background-color);
+  }
+}
+
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  background-color: rgba(245, 248, 250, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+}
+
+mat-card-title {
+  font-family: 'Merriweather', serif;
+  font-size: 28px;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+
+  input {
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-primary);
+  }
+}
+
+button {
+  width: 100%;
+  background-color: var(--secondary-color);
+  color: var(--text-white);
+  font-family: 'Roboto', sans-serif;
+  padding: 12px;
+  margin-top: 16px;
+
+  &:hover {
+    background-color: var(--primary-color);
+  }
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.register-link {
+  margin-top: 10px;
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-primary);
+  text-align: center;
+
+  a {
+    color: var(--secondary-color);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.error-message {
+  color: var(--error-color);
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+}

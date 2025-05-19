@@ -1,0 +1,41 @@
+.profile-container {
+    max-width: 600px;
+    margin: 30px auto;
+    background-color: #212121;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .profile-card {
+    background-color: #424242;
+    color: #FFFFFF;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  mat-card-title {
+    font-family: 'Merriweather', serif;
+    font-size: 24px;
+    color: #FFFFFF;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  mat-card-content {
+    font-family: 'Roboto', sans-serif;
+    color: #FFFFFF;
+  
+    p {
+      margin: 10px 0;
+      strong {
+        color: #B0BEC5;
+      }
+    }
+  }
+  
+  .loading {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }

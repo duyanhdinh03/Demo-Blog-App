@@ -1,0 +1,34 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~bootstrap/dist/css/bootstrap.min.css";
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+// Light Mode (mặc định)
+:root {
+  --page-background: #FFFFFF; // Nền trắng
+  --primary-color: #2E6BB8;
+  --secondary-color: #4A90E2;
+  --background-color: #F5F8FA;
+  --text-color: #B0C4DE;
+  --card-background: #1A355B; // Xanh navy cho các post
+  --card-text: #FFFFFF; // Chữ trắng trên nền xanh navy
+  --text-primary: #2E6BB8;
+  --text-white: #FFFFFF;
+  --hover-color: #72C92A;
+  --error-color: #dc3545;
+}
+
+// Dark Mode
+[data-theme="dark"] {
+  --page-background: #121212; // Nền đen
+  --primary-color: #1A4A8A;
+  --secondary-color: #2C6BBF;
+  --background-color: #1E2A44;
+  --text-color: #A0B0D0;
+  --card-background: #FFFFFF; // Post trắng
+  --card-text: #000000; // Chữ đen trên nền trắng
+  --text-primary: #4A90E2;
+  --text-white: #E0E0E0;
+  --hover-color: #5AA81E;
+  --error-color: #ff5555;
+}

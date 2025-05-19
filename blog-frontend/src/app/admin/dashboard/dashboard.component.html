@@ -1,0 +1,131 @@
+<div class="dashboard-container" *ngIf="!isLoading; else loading">
+  <!-- Thống kê cơ bản -->
+  <mat-card class="stat-card">
+    <mat-card-title>Tổng số bài viết</mat-card-title>
+    <mat-card-content>
+      <h2>{{ totalPosts }}</h2>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="stat-card">
+    <mat-card-title>Tổng số người dùng</mat-card-title>
+    <mat-card-content>
+      <h2>{{ totalUsers }}</h2>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="stat-card">
+    <mat-card-title>Lượt truy cập trang</mat-card-title>
+    <mat-card-content>
+      <h2>{{ pageViews }}</h2>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="stat-card">
+    <mat-card-title>Bài viết chưa duyệt</mat-card-title>
+    <mat-card-content>
+      <h2>{{ pendingPosts }}</h2>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Biểu đồ -->
+  <div class="chart-section">
+    <mat-card class="chart-card left-chart">
+      <mat-card-title>Bài viết theo ngày</mat-card-title>
+      <mat-card-content>
+        <canvas id="postsChart" width="400" height="200"></canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card left-chart">
+      <mat-card-title>Người dùng mới mỗi ngày</mat-card-title>
+      <mat-card-content>
+        <canvas id="usersChart" width="400" height="200"></canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card right-chart">
+      <mat-card-title>Trạng thái bài viết</mat-card-title>
+      <mat-card-content>
+        <canvas id="statusChart" width="800" height="400"></canvas>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Panel chỉ dành cho tạo bài viết -->
+  <mat-card class="quick-actions-card">
+    <mat-card-title>Thao tác nhanh</mat-card-title>
+    <mat-card-content>
+      <button mat-raised-button color="primary" (click)="toggleCreateForm()" *ngIf="!showCreateForm">Tạo bài viết</button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Form tạo bài viết -->
+  <mat-card class="quick-actions-card" *ngIf="showCreateForm">
+    <mat-card-title>Tạo bài viết mới</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="postForm" (ngSubmit)="submitPost()">
+        <mat-form-field appearance="fill">
+          <mat-label>Tiêu đề</mat-label>
+          <input matInput formControlName="name" required>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Nội dung</mat-label>
+          <textarea matInput formControlName="content" rows="5" required></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Tên người đăng</mat-label>
+          <input matInput formControlName="postedBy" required>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Tags (dùng dấu phẩy)</mat-label>
+          <input matInput formControlName="tags" (blur)="addTags($event)">
+        </mat-form-field>
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="postForm.invalid">Tạo</button>
+          <button mat-raised-button color="warn" type="button" (click)="cancelPost()">Hủy</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Bài viết gần đây -->
+  <mat-card class="posts-card">
+    <mat-card-title>Bài viết gần đây</mat-card-title>
+    <mat-card-content>
+      <div *ngFor="let post of recentPosts">
+        <p>{{ post.name }} - {{ post.postedBy }} - {{ getTimeAgo(post.date) }}</p>
+        <button mat-button (click)="viewPostDetails(post.id)">Xem chi tiết</button>
+        <button mat-button color="primary" (click)="approvePost(post.id)" *ngIf="post.status === 'PENDING'">Duyệt</button>
+      </div>
+      <mat-paginator [length]="recentPostsTotal" [pageSize]="7" (page)="onRecentPageChange($event)"></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Bài viết nổi bật -->
+  <mat-card class="posts-card">
+    <mat-card-title>Bài viết nổi bật</mat-card-title>
+    <mat-card-content>
+      <mat-form-field appearance="fill">
+        <mat-label>Lọc</mat-label>
+        <mat-select [(ngModel)]="sortBy" (ngModelChange)="loadTopPosts()">
+          <mat-option value="viewCounts">Lượt xem cao nhất</mat-option>
+          <mat-option value="likeCounts">Nhiều lượt thích nhất</mat-option>
+          <mat-option value="commentCount">Nhiều bình luận nhất</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div *ngFor="let post of topPosts">
+        <p>{{ post.name }} - {{ post.postedBy }} - {{ getTimeAgo(post.date) }}</p>
+        <button mat-button (click)="viewPostDetails(post.id)">Xem chi tiết</button>
+        <button mat-button color="primary" (click)="approvePost(post.id)" *ngIf="post.status === 'PENDING'">Duyệt</button>
+      </div>
+      <mat-paginator [length]="topPostsTotal" [pageSize]="7" (page)="onTopPageChange($event)"></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<ng-template #loading>
+  <div class="loading-overlay">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

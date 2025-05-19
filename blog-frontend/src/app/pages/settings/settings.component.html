@@ -1,0 +1,136 @@
+<div class="settings-container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section" (click)="activeTab = 'profile'" [class.active]="activeTab === 'profile'">
+      <mat-icon>person</mat-icon> {{ 'settings.profile' | translate }}
+    </div>
+    <div class="sidebar-section" (click)="activeTab = 'change-password'" [class.active]="activeTab === 'change-password'">
+      <mat-icon>lock</mat-icon> {{ 'settings.changePassword' | translate }}
+    </div>
+    <div class="sidebar-section" (click)="activeTab = 'ui-customization'" [class.active]="activeTab === 'ui-customization'">
+      <mat-icon>palette</mat-icon> {{ 'settings.uiCustomization' | translate }}
+    </div>
+    <div class="sidebar-section" (click)="activeTab = 'delete-account'" [class.active]="activeTab === 'delete-account'">
+      <mat-icon>delete</mat-icon> {{ 'settings.deleteAccount' | translate }}
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>{{ 'settings.title' | translate }}</h1>
+
+    <!-- Back to Home Button -->
+    <button mat-raised-button color="primary" routerLink="/view-all" class="back-button">
+      {{ 'settings.backToHome' | translate }}
+    </button>
+
+    <!-- Profile Section -->
+    <div class="setting-section" *ngIf="activeTab === 'profile'">
+      <h2>{{ 'settings.profile' | translate }}</h2>
+      <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'settings.fullName' | translate }}</mat-label>
+          <input matInput formControlName="fullName">
+          <mat-error *ngIf="profileForm.get('fullName')?.hasError('required')">
+            {{ 'settings.fullNameRequired' | translate }}
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'settings.address' | translate }}</mat-label>
+          <input matInput formControlName="address">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'settings.email' | translate }}</mat-label>
+          <input matInput formControlName="email">
+          <mat-error *ngIf="profileForm.get('email')?.hasError('required')">
+            {{ 'settings.emailRequired' | translate }}
+          </mat-error>
+          <mat-error *ngIf="profileForm.get('email')?.hasError('email')">
+            {{ 'settings.emailInvalid' | translate }}
+          </mat-error>
+        </mat-form-field>
+        <div class="avatar-upload">
+          <label>{{ 'settings.avatar' | translate }}</label>
+          <input type="file" (change)="onFileSelected($event)" accept="image/*">
+          <img *ngIf="avatarUrl" [src]="avatarUrl" alt="Avatar" class="avatar-preview">
+          <p *ngIf="avatarUrl">{{ 'settings.avatarUpdatedNotice' | translate }}</p>
+        </div>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!profileForm.valid">
+          {{ 'Lưu cài đặt' | translate }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Change Password Section -->
+    <div class="setting-section" *ngIf="activeTab === 'change-password'">
+      <h2>{{ 'settings.changePassword' | translate }}</h2>
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="change-password-form">
+          <mat-form-field appearance="fill">
+              <mat-label>{{ 'settings.currentPassword' | translate }}</mat-label>
+              <input matInput type="password" formControlName="currentPassword">
+              <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('required')">
+                  {{ 'settings.currentPasswordRequired' | translate }}
+              </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+              <mat-label>{{ 'settings.newPassword' | translate }}</mat-label>
+              <input matInput type="password" formControlName="newPassword">
+              <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
+                  {{ 'settings.newPasswordRequired' | translate }}
+              </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+              <mat-label>{{ 'settings.confirmPassword' | translate }}</mat-label>
+              <input matInput type="password" formControlName="confirmPassword">
+              <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('required')">
+                  {{ 'settings.confirmPasswordRequired' | translate }}
+              </mat-error>
+              <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('mismatch')">
+                  {{ 'settings.passwordMismatch' | translate }}
+              </mat-error>
+          </mat-form-field>
+          <div>
+              <button mat-raised-button (click)="resetPasswordForm()">{{ 'settings.clear' | translate }}</button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="!passwordForm.valid">
+                  {{ 'settings.confirm' | translate }}
+              </button>
+          </div>
+      </form>
+  </div>
+
+    <!-- UI Customization Section -->
+    <div class="setting-section" *ngIf="activeTab === 'ui-customization'">
+      <h2>{{ 'settings.uiCustomization' | translate }}</h2>
+      <mat-form-field appearance="fill">
+        <mat-label>{{ 'settings.postsPerPage' | translate }}</mat-label>
+        <mat-select [(ngModel)]="settings.postsPerPage" (selectionChange)="saveSettings()">
+          <mat-option value="10">10</mat-option>
+          <mat-option value="20">20</mat-option>
+          <mat-option value="30">30</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>{{ 'settings.language' | translate }}</mat-label>
+        <mat-select [(ngModel)]="selectedLanguage" (selectionChange)="changeLanguage()">
+          <mat-option value="en">{{ 'settings.english' | translate }}</mat-option>
+          <mat-option value="vi">{{ 'settings.vietnamese' | translate }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>{{ 'settings.homepagePreference' | translate }}</mat-label>
+        <mat-select [(ngModel)]="settings.homepagePreference" (selectionChange)="saveSettings()">
+          <mat-option value="newest">{{ 'settings.newestPosts' | translate }}</mat-option>
+          <mat-option value="followed">{{ 'settings.followedPosts' | translate }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Delete Account Section -->
+    <div class="setting-section" *ngIf="activeTab === 'delete-account'">
+      <h2>{{ 'settings.deleteAccount' | translate }}</h2>
+      <button mat-raised-button color="warn" (click)="deleteAccount()">
+        {{ 'settings.requestDelete' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

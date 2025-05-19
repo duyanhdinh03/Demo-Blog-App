@@ -1,0 +1,84 @@
+<div *ngIf="postData" class="card-container">
+  <mat-card>
+    <mat-card-header>
+      <img mat-card-avatar [src]="postData.avatarUrl || 'https://picsum.photos/40/40'" alt="User Avatar">
+      <mat-card-title>{{ postData.name }}</mat-card-title>
+      <mat-card-subtitle>Posted by: {{ postData.postedBy }}</mat-card-subtitle>
+      <mat-card-subtitle>Posted on: {{ postData.date | date:'medium' }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div [innerHTML]="postData.content"></div>
+    </mat-card-content>
+    <mat-chip-listbox>
+      <mat-chip *ngFor="let tag of postData.tags">{{ tag }}</mat-chip>
+    </mat-chip-listbox>
+    <mat-card-actions class="post-actions">
+      <div class="action-item">
+        <button mat-raised-button color="primary" (click)="likePost()">
+          {{ postData.likeCounts ?? 0 }}
+          <mat-icon>thumb_up</mat-icon>
+        </button>
+      </div>
+      <div class="action-item">
+        <button mat-raised-button color="primary">
+          {{ postData.viewCounts ?? 0 }}
+          <mat-icon>remove_red_eye</mat-icon>
+        </button>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card class="comment-card">
+    <mat-card-content>
+      <h4>Publish Your Comment</h4>
+      <div>
+        <form [formGroup]="commentForm">
+          <mat-form-field appearance="fill">
+            <mat-label>Content</mat-label>
+            <textarea matInput formControlName="content"></textarea>
+            <mat-error *ngIf="commentForm.get('content')?.hasError('required') && commentForm.get('content')?.touched">
+              Vui lòng nhập nội dung bình luận
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Posted By</mat-label>
+            <textarea matInput formControlName="postedBy"></textarea>
+            <mat-error *ngIf="commentForm.get('postedBy')?.hasError('required') && commentForm.get('postedBy')?.touched">
+              Vui lòng nhập tên người đăng
+            </mat-error>
+          </mat-form-field>
+
+          <button mat-raised-button (click)="publishComment()" 
+                  color="primary" style="float: right;" [disabled]="!commentForm.valid">
+            Publish Comment
+          </button>
+        </form>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div style="margin-top: 10px;">
+  <h3>
+    Comments
+    <button mat-icon-button (click)="toggleComments()" style="margin-left: 10px;">
+      <mat-icon>{{ showComments ? 'visibility_off' : 'visibility' }}</mat-icon>
+    </button>
+  </h3>
+  <div *ngIf="showComments">
+    <div *ngIf="comments.length === 0" style="margin-top: 10px;">
+      <p>Chưa có bình luận nào cho bài viết này.</p>
+    </div>
+    <mat-card style="margin-top: 10px;" *ngFor="let comment of comments">
+      <mat-card-header>
+        <div mat-card-avatar class="example-header-image"></div>
+        <mat-card-title>{{ comment.postedBy }}</mat-card-title>
+        <mat-card-subtitle>Posted on: {{ comment.createdAt | date:'medium' }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        {{ comment.content }}
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+</div>

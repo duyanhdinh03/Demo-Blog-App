@@ -1,0 +1,25 @@
+<div class="create-post-container">
+  <h2>Tạo bài viết mới</h2>
+  <form [formGroup]="postForm" (ngSubmit)="createPost()">
+    <mat-form-field appearance="fill">
+      <mat-label>Tiêu đề</mat-label>
+      <input matInput formControlName="name" required>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Nội dung</mat-label>
+      <textarea matInput formControlName="content" rows="5" required></textarea>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Tên người đăng</mat-label>
+      <input matInput formControlName="postedBy" required>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Tags (dùng dấu phẩy để phân cách)</mat-label>
+      <input matInput formControlName="tags" (blur)="addTags($event)">
+    </mat-form-field>
+    <div class="button-group">
+      <button mat-raised-button color="primary" type="submit" [disabled]="postForm.invalid">Tạo</button>
+      <button mat-raised-button color="warn" type="button" (click)="cancel()">Hủy</button>
+    </div>
+  </form>
+</div>

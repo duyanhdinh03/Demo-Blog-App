@@ -1,0 +1,27 @@
+.contact-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+
+  .contact-card {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+
+    mat-card-title {
+      font-family: 'Merriweather', serif;
+      font-size: 28px;
+      color: var(--card-text);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    mat-card-content {
+      font-family: 'Roboto', sans-serif;
+      font-size: 16px;
+      color: var(--card-text);
+      text-align: center;
+    }
+  }
+}

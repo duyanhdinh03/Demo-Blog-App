@@ -1,0 +1,23 @@
+.about-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: var(--card-background);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+
+  h1 {
+    font-family: 'Merriweather', serif;
+    font-size: 36px;
+    color: var(--card-text);
+    margin-bottom: 20px;
+  }
+
+  p {
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px;
+    color: var(--card-text);
+    line-height: 1.6;
+  }
+}

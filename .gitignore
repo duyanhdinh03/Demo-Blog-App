@@ -1,0 +1,67 @@
+# Environment files
+blog-backend/.env
+blog-backend/*.env.*
+.env
+*.env.*
+
+# Maven/Spring Boot (blog-backend)
+blog-backend/target/
+blog-backend/.m2/
+blog-backend/application.properties
+blog-backend/application.yml
+blog-backend/*.log
+
+# Angular/Node (blog-frontend)
+blog-frontend/node_modules/
+blog-frontend/dist/
+blog-frontend/.angular/cache
+blog-frontend/npm-debug.log
+blog-frontend/yarn-error.log
+blog-frontend/testem.log
+
+# IDEs and editors
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.vscode/
+blog-backend/.vscode/
+blog-frontend/.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Miscellaneous
+blog-backend/out/
+blog-frontend/tmp/
+blog-frontend/out-tsc/
+blog-frontend/bazel-out/
+blog-frontend/.sass-cache/
+blog-frontend/connect.lock
+blog-frontend/coverage/
+blog-frontend/libpeerconnection.log
+blog-frontend/typings/
+blog-frontend/.history/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Keep important files
+!.mvn/wrapper/maven-wrapper.jar
+!blog-backend/pom.xml
+!blog-backend/src/
+!blog-frontend/package.json
+!blog-frontend/src/
+!blog-frontend/angular.json

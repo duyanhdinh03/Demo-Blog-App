@@ -1,0 +1,291 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff; /* Màu nền chung của trang */
+}
+
+.slider-region {
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+}
+
+.featured-region {
+  background-color: #E6F3FA; /* Xanh nhạt cho slider nổi bật */
+}
+
+.latest-region {
+  background-color: #FCE4EC; /* Hồng nhạt cho slider mới nhất */
+}
+
+.slider-section {
+  .slide-container {
+    padding: 10px;
+  }
+
+  .slider-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    mat-card-header {
+      padding: 10px;
+
+      mat-card-title {
+        font-family: 'Merriweather', serif;
+        font-size: 16px;
+        color: #1A237E;
+        margin-bottom: 5px;
+      }
+
+      mat-card-subtitle {
+        font-family: 'Roboto', sans-serif;
+        font-size: 12px;
+        color: #757575;
+      }
+
+      img[mat-card-avatar] {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    mat-card-content {
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      color: #212121;
+      padding: 10px;
+      flex-grow: 1;
+
+      div {
+        margin-bottom: 5px;
+      }
+
+      p {
+        margin: 5px 0;
+        font-size: 11px;
+        color: #757575;
+      }
+    }
+
+    mat-card-actions {
+      padding: 10px;
+      text-align: center;
+
+      button {
+        background-color: #4A90E2;
+        color: #F5F8FA;
+        font-size: 12px;
+        padding: 5px 10px;
+
+        &:hover {
+          background-color: #2E6BB8;
+        }
+      }
+    }
+  }
+}
+
+.posts-region {
+  background-color: #F0F4F8; /* Xám nhạt cho vùng bài viết */
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.tags-filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  .tags-section {
+    flex: 0 0 60%;
+
+    mat-chip-listbox {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      mat-chip-option {
+        background-color: #4A90E2;
+        color: #F5F8FA;
+        font-family: 'Roboto', sans-serif;
+        padding: 5px 10px;
+        border-radius: 16px;
+        cursor: pointer;
+
+        &:hover {
+          background-color: #2E6BB8;
+        }
+
+        &.mat-mdc-chip-selected {
+          background-color: #FF6F61;
+        }
+      }
+    }
+  }
+
+  .filter-section {
+    flex: 0 0 35%;
+
+    mat-form-field {
+      width: 100%;
+      font-size: 14px;
+
+      .mat-mdc-form-field {
+        background-color: #fff;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+        .mat-mdc-text-field-wrapper {
+          background-color: transparent;
+        }
+
+        .mat-mdc-form-field-label {
+          color: #757575;
+        }
+
+        .mat-mdc-form-field-ripple {
+          background-color: #FF6F61;
+        }
+
+        .mat-select-value,
+        .mat-select-arrow {
+          color: #212121;
+        }
+      }
+    }
+  }
+}
+
+.posts-block {
+  .post-card {
+    background-color: #fff;
+    color: #212121;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+  }
+
+  mat-card-title {
+    font-family: 'Merriweather', serif;
+    font-size: 20px;
+    color: #1A237E;
+  }
+
+  mat-card-subtitle {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    color: #757575;
+  }
+
+  mat-card-content {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: #212121;
+  }
+
+  mat-card-actions {
+    button {
+      background-color: #4A90E2;
+      color: #F5F8FA;
+      margin-left: 8px;
+
+      &:hover {
+        background-color: #2E6BB8;
+      }
+    }
+  }
+}
+
+.example-header-image {
+  background-image: url('https://picsum.photos/200/300?grayscale');
+  background-size: cover;
+  background-position: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.no-posts {
+  text-align: center;
+  color: #757575;
+  font-family: 'Roboto', sans-serif;
+}
+
+mat-paginator {
+  background-color: #fff;
+  color: #212121;
+  margin-top: 20px;
+  border-radius: 8px;
+
+  ::ng-deep .mat-paginator-container {
+    .mat-paginator-page-size-label,
+    .mat-paginator-range-label {
+      color: #757575;
+    }
+
+    .mat-select-value,
+    .mat-select-arrow {
+      color: #212121;
+    }
+
+    .mat-paginator-icon {
+      fill: #212121;
+    }
+
+    .mat-paginator-navigation-previous,
+    .mat-paginator-navigation-next {
+      color: #4A90E2;
+
+      &:hover {
+        background-color: #2E6BB8;
+        color: #F5F8FA;
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .slider-region {
+    padding: 10px;
+  }
+
+  .tags-filter-container {
+    flex-direction: column;
+
+    .tags-section, .filter-section {
+      flex: 100%;
+      margin-bottom: 10px;
+    }
+  }
+
+  .slider-section .row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .col-lg-2 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}

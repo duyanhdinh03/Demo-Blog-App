@@ -1,0 +1,49 @@
+<mat-card class="center-card">
+  <mat-card-content>
+    <form [formGroup]="postForm" (ngSubmit)="createPost()">
+      <mat-form-field appearance="fill">
+        <mat-label>Tiêu đề</mat-label>
+        <input matInput formControlName="name" />
+        <mat-error *ngIf="postForm.get('name')?.hasError('required')">
+          Tiêu đề là bắt buộc
+        </mat-error>
+        <mat-error *ngIf="postForm.get('name')?.hasError('pattern')">
+          Tiêu đề không được chỉ chứa khoảng trắng
+        </mat-error>
+      </mat-form-field>
+
+      <div class="editor-container">
+        <label>Nội dung</label>
+        <div class="tiptap"></div>
+        <input type="file" (change)="onImageSelected($event)" accept="image/jpeg,image/png,image/gif,image/webp" />
+      </div>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Tags (nhập và nhấn Enter)</mat-label>
+        <mat-chip-grid #chipGrid aria-label="Enter tags">
+          <mat-chip-row *ngFor="let tag of tags; let i = index" (removed)="remove(tag)">
+            {{tag}}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+          <input placeholder="Thêm tag..." [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
+            (matChipInputTokenEnd)="add($event)" matChipInputAddOnBlur />
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let tag of availableTags" [value]="tag">
+              {{tag}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-chip-grid>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" style="float: right;" [disabled]="!postForm.valid || !editor.getHTML()"
+        type="submit">
+        Tạo bài viết
+      </button>
+      <button mat-button style="float: right; margin-right: 8px;" routerLink="/view-all">
+        Hủy
+      </button>
+    </form>
+  </mat-card-content>
+</mat-card>
