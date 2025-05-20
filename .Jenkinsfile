@@ -57,6 +57,15 @@ pipeline {
                 }
             }
         }
+        stage('Check Frontend Deployment') {
+            steps {
+                script {
+                    sh '''
+                    curl -s -o /dev/null -w "%{http_code}" https://my-blog-app.pages.dev | grep 200 || exit 1
+                    '''
+                }
+            }
+        }
         stage('Deploy to Swarm') {
             steps {
                 withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
