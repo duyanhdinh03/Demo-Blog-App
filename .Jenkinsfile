@@ -10,6 +10,36 @@ pipeline {
                 git url: 'https://github.com/duyanhdinh03/Demo-Blog-App.git', branch: 'master'
             }
         }
+
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'npm install'
+                    sh 'npm run build --configuration production'
+                }
+            }
+        }
+        stage('Deploy Frontend to Cloudflare Pages') {
+            steps {
+                withCredentials([string(credentialsId: 'cloudflare-api-token', variable: 'CLOUDFLARE_API_TOKEN')]) {
+                    sh '''
+                    curl -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/trigger/$CLOUDFLARE_PROJECT" \
+                    -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                    -H "Content-Type: application/json"
+                    '''
+                }
+            }
+        }
+        stage('Check Frontend Deployment') {
+            steps {
+                script {
+                    sh '''
+                    sleep 30 
+                    curl -s -o /dev/null -w "%{http_code}" https://my-blog-app.pages.dev | grep 200 || exit 1
+                    '''
+                }
+            }
+        }
         stage('Code Quality Check - SonarQube') {
             steps {
                 withSonarQubeEnv('SonarQube') {
