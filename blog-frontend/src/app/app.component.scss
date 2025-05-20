@@ -1,9 +1,9 @@
 .navbar {
-  background-color: #1E90FF;
+  background-color: #2D3748;
   color: #FFFFFF;
   padding: 10px 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: top 0.3s;
+  transition: top 0.3s ease;
   display: flex;
   align-items: center;
 
@@ -18,13 +18,13 @@
     margin-right: 15px;
 
     img {
-      width: 70px; 
+      width: 70px;
       height: 70px;
-      object-fit:cover;
-      transition: transform 0.3s, opacity 0.3s;
+      object-fit: cover;
+      transition: transform 0.3s ease, opacity 0.3s ease;
 
       &:hover {
-        transform: scale(1.05); 
+        transform: scale(1.05);
         opacity: 0.9;
       }
     }
@@ -33,6 +33,7 @@
   .brand {
     font-family: 'Merriweather', serif;
     font-size: 24px;
+    font-weight: 700;
     color: #FFFFFF;
     margin-left: 10px;
   }
@@ -41,76 +42,43 @@
     flex: 1 1 auto;
   }
 
-  .hero-section {
-  height: 400px;
-  background: url('/assets/img/bg-img1.jpg') no-repeat center center;
-  background-size: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 64px;
-  position: relative;
-
-  .hero-text {
-    text-align: center;
-    background: rgba(0, 0, 0, 0.6); /* Nền bán trong suốt để nổi bật trên ảnh */
-    padding: 20px 40px;
-    border-radius: 12px;
-    display: inline-block;
-
-    h1 {
-      font-family: 'Merriweather', serif;
-      font-size: 64px; /* Tăng kích thước chữ */
-      color: #FFFFFF;
-      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
-      margin: 0;
-      line-height: 1.2;
-    }
-  }
-}
   .nav-links {
     display: flex;
     align-items: center;
 
     .nav-item {
       color: #FFFFFF;
-      margin: 0 20px;
+      margin: 0 15px;
       font-family: 'Roboto', sans-serif;
       font-size: 16px;
       padding: 8px 12px;
       border-radius: 4px;
-      transition: background-color 0.3s, color 0.3s;
+      transition: background-color 0.3s ease, color 0.3s ease;
 
       &:hover {
-        background-color: #104E8B;
+        background-color: #4A5568;
         color: #FFFFFF;
-        text-decoration: none;
       }
     }
 
-    .user-icon {
-      color: #FFFFFF;
-      margin-left: 10px;
-      font-size: 28px; /* Tăng kích thước icon */
-      width: 40px;
-      height: 40px;
-      line-height: 40px;
-
-      &:hover {
-        color: #104E8B;
-      }
-    }
-
+    .user-icon,
     .theme-toggle {
       color: #FFFFFF;
       margin-left: 10px;
-      font-size: 28px; /* Tăng kích thước icon */
-      width: 40px;
-      height: 40px;
-      line-height: 40px;
+      width: 48px;
+      height: 48px;
+      line-height: 48px;
+      transition: color 0.3s ease;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+      }
 
       &:hover {
-        color: #104E8B;
+        color: #A0AEC0;
       }
     }
   }

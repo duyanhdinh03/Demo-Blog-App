@@ -41,7 +41,7 @@ export class AppComponent implements OnInit, OnDestroy {
         url.startsWith('/settings') ||
         url.startsWith('/posts/create-post')
       );
-      this.isPublicRoute = this.publicRoutes.some(route => url.startsWith(route)); // Cập nhật isPublicRoute
+      this.isPublicRoute = this.publicRoutes.some(route => url.startsWith(route));
     });
   }
 
@@ -51,7 +51,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    console.log('Logout called');
     this.authService.logout();
     this.router.navigateByUrl('/login');
   }

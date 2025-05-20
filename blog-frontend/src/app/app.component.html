@@ -1,7 +1,7 @@
 <div *ngIf="showNavbarAndHero">
   <mat-toolbar class="navbar" [class.sticky]="isSticky">
     <button mat-icon-button class="logo-button" routerLink="/view-all" aria-label="Go to home">
-      <img src="assets/img/medium-logo.png" alt="Logo" width="120" height="60"/> 
+      <img src="assets/img/medium-logo.png" alt="Logo" width="70" height="70"/> 
     </button>
     <span class="brand">Jonas Blog</span>
     <span class="spacer"></span>
@@ -14,7 +14,7 @@
 
       <ng-container *ngIf="authService.isLoggedIn$ | async; else guestView">
         <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-icon" aria-label="User menu">
-          <mat-icon>account_circle</mat-icon>
+          <mat-icon fontSize="32px">account_circle</mat-icon>
         </button>
         <mat-menu #userMenu="matMenu">
           <button mat-menu-item routerLink="/posts/create-post">Tạo bài viết</button>
@@ -27,18 +27,11 @@
         <button mat-button routerLink="/login" class="nav-item" aria-label="Login">Login</button>
       </ng-template>
 
-      <!-- Nút chuyển đổi theme -->
       <button mat-icon-button (click)="toggleTheme()" class="theme-toggle" aria-label="Toggle theme">
-        <mat-icon>{{ currentTheme === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+        <mat-icon fontSize="32px">{{ currentTheme === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
       </button>
     </div>
   </mat-toolbar>
-
-  <div class="hero-section">
-    <div class="hero-text">
-      <h1>Welcome to my blog !!</h1>
-    </div>
-  </div>
 </div>
 <router-outlet></router-outlet>
 <app-footer *ngIf="isPublicRoute"></app-footer>
