@@ -3,6 +3,7 @@ pipeline {
     environment {
         NEXUS_URL = "10.0.2.10:8081"
         NEXUS_REPO = "repository/docker-hosted"
+        CLOUDFLARE_PROJECT = "my-blog-app"
     }
     stages {
         stage('Checkout') {
@@ -10,7 +11,6 @@ pipeline {
                 git url: 'https://github.com/duyanhdinh03/Demo-Blog-App.git', branch: 'master'
             }
         }
-
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
@@ -34,7 +34,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    sleep 30 
+                    sleep 30
                     curl -s -o /dev/null -w "%{http_code}" https://my-blog-app.pages.dev | grep 200 || exit 1
                     '''
                 }
@@ -87,15 +87,6 @@ pipeline {
                 }
             }
         }
-        stage('Check Frontend Deployment') {
-            steps {
-                script {
-                    sh '''
-                    curl -s -o /dev/null -w "%{http_code}" https://my-blog-app.pages.dev | grep 200 || exit 1
-                    '''
-                }
-            }
-        }
         stage('Deploy to Swarm') {
             steps {
                 withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
@@ -109,8 +100,8 @@ pipeline {
                     docker secret rm db_password db_sonar_password || true
                     docker secret create db_password /tmp/db_password
                     docker secret create db_sonar_password /tmp/db_sonar_password
-                    sed -i "s|jdbc:postgresql://.*:5432/sonarqube|jdbc:postgresql://$DB_HOST:$DB_PORT/sonarqube|" docker-stack.yml
-                    sed -i "s|jdbc:postgresql://.*:5432/blogdb|jdbc:postgresql://$DB_HOST:$DB_PORT/$DB_NAME|" docker-stack.yml
+                    sed -i "s|jdbc:postgresql://your-db-host:5432/sonarqube|jdbc:postgresql://$DB_HOST:$DB_PORT/sonarqube|" docker-stack.yml
+                    sed -i "s|jdbc:postgresql://your-db-host:5432/blogdb|jdbc:postgresql://$DB_HOST:$DB_PORT/$DB_NAME|" docker-stack.yml
                     docker stack rm blog-demo || true
                     docker stack deploy -c docker-stack.yml blog-demo
                     rm -f /tmp/rds_cred /tmp/db_password /tmp/db_sonar_password
