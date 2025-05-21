@@ -1,25 +1,5 @@
 version: '3.8'
-
 services:
-  jenkins:
-    image: jenkins/jenkins:lts
-    ports:
-      - "8082:8080"
-    volumes:
-      - jenkins-data:/var/jenkins_home
-    networks:
-      - blogdemo-network
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 1.5G
-        reservations:
-          cpus: "0.5"
-          memory: 1G
-
   prometheus:
     image: prom/prometheus
     volumes:
@@ -33,12 +13,11 @@ services:
         constraints: [node.role == manager]
       resources:
         limits:
-          cpus: "0.3"
-          memory: 512M
+          cpus: "0.5"
+          memory: 1G
         reservations:
           cpus: "0.2"
-          memory: 256M
-
+          memory: 512M
   grafana:
     image: grafana/grafana
     ports:
@@ -50,12 +29,11 @@ services:
         constraints: [node.role == manager]
       resources:
         limits:
-          cpus: "0.3"
-          memory: 512M
+          cpus: "0.5"
+          memory: 1G
         reservations:
           cpus: "0.2"
-          memory: 256M
-
+          memory: 512M
   nexus:
     image: sonatype/nexus3
     ports:
@@ -65,16 +43,14 @@ services:
     networks:
       - blogdemo-network
     deploy:
-      placement:
-        constraints: [node.hostname == worker2]
+      replicas: 1
       resources:
         limits:
-          cpus: "0.5"
-          memory: 1.2G
+          cpus: "1.0"
+          memory: 2G
         reservations:
-          cpus: "0.25"
-          memory: 768M
-
+          cpus: "0.5"
+          memory: 1G
   sonarqube:
     image: sonarqube:community
     ports:
@@ -86,18 +62,18 @@ services:
     networks:
       - blogdemo-network
     deploy:
-      placement:
-        constraints: [node.hostname == worker1]
+      replicas: 1
       resources:
         limits:
           cpus: "1.0"
-          memory: 2G
+          memory: 2.5G
         reservations:
           cpus: "0.5"
-          memory: 1G
-
+          memory: 1.5G
   backend:
     image: 10.0.2.10:8081/repository/docker-hosted/my-blog-backend:latest
+    ports:
+      - "8080:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://your-db-host:5432/blogdb
       - SPRING_DATASOURCE_USERNAME=admin
@@ -108,12 +84,11 @@ services:
       replicas: 2
       resources:
         limits:
-          cpus: "0.4"
-          memory: 600M
+          cpus: "0.5"
+          memory: 1G
         reservations:
-          cpus: "0.2"
-          memory: 300M
-
+          cpus: "0.25"
+          memory: 512M
   nginx:
     image: 10.0.2.10:8081/repository/docker-hosted/my-nginx:latest
     ports:
@@ -127,26 +102,21 @@ services:
       replicas: 2
       resources:
         limits:
-          cpus: "0.2"
-          memory: 256M
+          cpus: "0.3"
+          memory: 512M
         reservations:
-          cpus: "0.1"
-          memory: 128M
-
+          cpus: "0.15"
+          memory: 256M
 volumes:
   nexus-data:
-  jenkins-data:
-
 networks:
   blogdemo-network:
     external: true
-
 secrets:
   db_password:
     external: true
   db_sonar_password:
     external: true
-
 configs:
   nginx_conf:
     external: true
