@@ -1,0 +1,152 @@
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8082:8080"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+    networks:
+      - blogdemo-network
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1.5G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - blogdemo-network
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - blogdemo-network
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
+
+  nexus:
+    image: sonatype/nexus3
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus-data:/nexus-data
+    networks:
+      - blogdemo-network
+    deploy:
+      placement:
+        constraints: [node.hostname == worker2]
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1.2G
+        reservations:
+          cpus: "0.25"
+          memory: 768M
+
+  sonarqube:
+    image: sonarqube:community
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://your-db-host:5432/sonarqube
+      - SONAR_JDBC_USERNAME=admin
+      - SONAR_JDBC_PASSWORD_FILE=/run/secrets/db_sonar_password
+    networks:
+      - blogdemo-network
+    deploy:
+      placement:
+        constraints: [node.hostname == worker1]
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+
+  backend:
+    image: 10.0.2.10:8081/repository/docker-hosted/my-blog-backend:latest
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://your-db-host:5432/blogdb
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD_FILE=/run/secrets/db_password
+    networks:
+      - blogdemo-network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: 600M
+        reservations:
+          cpus: "0.2"
+          memory: 300M
+
+  nginx:
+    image: 10.0.2.10:8081/repository/docker-hosted/my-nginx:latest
+    ports:
+      - "80:80"
+    networks:
+      - blogdemo-network
+    configs:
+      - source: nginx_conf
+        target: /etc/nginx/nginx.conf
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+volumes:
+  nexus-data:
+  jenkins-data:
+
+networks:
+  blogdemo-network:
+    external: true
+
+secrets:
+  db_password:
+    external: true
+  db_sonar_password:
+    external: true
+
+configs:
+  nginx_conf:
+    external: true
