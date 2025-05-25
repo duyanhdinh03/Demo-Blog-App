@@ -37,21 +37,11 @@ pipeline {
                     credentialsId: 'cloudflare-api-token',
                     variable: 'CLOUDFLARE_API_TOKEN'
                 )]) {
-                    script {
-                        def response = httpRequest(
-                            url: "https://api.cloudflare.com/client/v4/pages/webhooks/trigger/${CLOUDFLARE_PROJECT}",
-                            httpMode: 'POST',
-                            customHeaders: [
-                                [name: 'Authorization', value: "Bearer ${CLOUDFLARE_API_TOKEN}"],
-                                [name: 'Content-Type', value: 'application/json']
-                            ],
-                            validResponseCodes: '200:499'
-                        )
-
-                        if (response.status != 200) {
-                            error("Cloudflare deployment failed: ${response.content}")
-                        }
-                    }
+                    sh '''
+                        curl -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/trigger/$CLOUDFLARE_PROJECT" \
+                        -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                        -H "Content-Type: application/json"
+                    '''
                 }
             }
         }
