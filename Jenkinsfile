@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        NEXUS_URL = credentials('nexus-url') 
+        NEXUS_URL = credentials('nexus-url')
         NEXUS_REPO = "repository/docker-hosted"
         CLOUDFLARE_PROJECT = "my-blog-app"
         DOCKER_REGISTRY = "${NEXUS_URL}/${NEXUS_REPO}"
@@ -54,13 +54,6 @@ pipeline {
                 }
             }
         }
-        
-        stage('Install Trivy') {
-            steps {
-                sh 'curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin'
-            }
-        }
-        
         stage('Build & Scan Images') {
             steps {
                 script {
@@ -118,11 +111,9 @@ pipeline {
                     region: 'ap-southeast-1'
                 ) {
                     script {
-
                         def rdsSecret = getSecret('rds-credentials')
                         def dbSecret = getSecret('db-password')
                         def sonarSecret = getSecret('db-sonar-password')
-
 
                         writeFile(
                             file: 'docker-stack.prod.yml',
@@ -136,7 +127,6 @@ pipeline {
                             )
                         )
 
-                        // Deploy stack
                         sh '''
                             docker stack deploy \
                                 --with-registry-auth \
@@ -146,27 +136,6 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            cleanWs()
-            script {
-                sh 'docker logout $NEXUS_URL || true'
-            }
-        }
-        success {
-            slackSend(
-                color: 'good',
-                message: "Deployment SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-            )
-        }
-        failure {
-            slackSend(
-                color: 'danger',
-                message: "Deployment FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-            )
         }
     }
 }
