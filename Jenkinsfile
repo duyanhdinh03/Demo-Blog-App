@@ -55,7 +55,13 @@ pipeline {
                 }
             }
         }
-
+        
+        stage('Install Trivy') {
+            steps {
+                sh 'curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin'
+            }
+        }
+        
         stage('Build & Scan Images') {
             steps {
                 script {
