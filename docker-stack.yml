@@ -1,8 +1,10 @@
+```yaml
 version: '3.8'
 services:
   prometheus:
     image: prom/prometheus
     volumes:
+      - prometheus_data:/prometheus
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
@@ -10,7 +12,11 @@ services:
       - blogdemo-network
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints: 
+        - node.role == manager
+      replicas: 1
+      restart_policy:
+        condition: on-failure
       resources:
         limits:
           cpus: "0.5"
@@ -26,11 +32,15 @@ services:
       - blogdemo-network
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints: 
+        - node.role == manager
+      replicas: 1
+      restart_policy:
+        condition: on-failure
       resources:
         limits:
           cpus: "0.5"
-          memory: 1G
+          memory: 512M
         reservations:
           cpus: "0.2"
           memory: 512M
@@ -43,11 +53,16 @@ services:
     networks:
       - blogdemo-network
     deploy:
+      placement:
+        constraints: 
+        - node.role == manager
       replicas: 1
+      restart_policy:
+        condition: on-failure
       resources:
         limits:
           cpus: "1.0"
-          memory: 2G
+          memory: 1G
         reservations:
           cpus: "0.5"
           memory: 1G
@@ -56,50 +71,78 @@ services:
     ports:
       - "9000:9000"
     environment:
-      - SONAR_JDBC_URL=jdbc:postgresql://your-db-host:5432/sonarqube
+      - SONAR_JDBC_URL=jdbc:postgresql://<rds-endpoint>:5432/sonarqube
       - SONAR_JDBC_USERNAME=admin
-      - SONAR_JDBC_PASSWORD_FILE=/run/secrets/db_sonar_password
+      - SONAR_JDBC_PASSWORD=${SONAR_JDBC_PASSWORD}
+    secrets:
+      - db_sonar_password
     networks:
       - blogdemo-network
     deploy:
+      placement:
+        constraints: 
+        - node.role == manager
       replicas: 1
+      restart_policy:
+        condition: on-failure
       resources:
         limits:
           cpus: "1.0"
-          memory: 2.5G
+          memory: 2G
         reservations:
           cpus: "0.5"
-          memory: 1.5G
+          memory: 1G
   backend:
-    image: 10.0.2.10:8081/repository/docker-hosted/my-blog-backend:latest
+    image: <nexus-private-ip>:8081/repository/docker-hosted/my-blog-backend:latest
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://your-db-host:5432/blogdb
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://<rds-endpoint>:5432/blogdb
       - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD_FILE=/run/secrets/db_password
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    secrets:
+      - db_password
     networks:
       - blogdemo-network
     deploy:
-      replicas: 2
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          - node.role == worker
       resources:
         limits:
-          cpus: "0.5"
-          memory: 1G
-        reservations:
-          cpus: "0.25"
-          memory: 512M
+          cpus: "0.75"
+          memory: 1.5G
   nginx:
-    image: 10.0.2.10:8081/repository/docker-hosted/my-nginx:latest
+    image: <nexus-private-ip>:8081/repository/docker-hosted/my-nginx:latest
     ports:
       - "80:80"
-    networks:
-      - blogdemo-network
+      - "443:443"
     configs:
       - source: nginx_conf
         target: /etc/nginx/nginx.conf
+    networks:
+      - blogdemo-network
     deploy:
-      replicas: 2
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          - node.role == worker
       resources:
         limits:
           cpus: "0.3"
@@ -107,6 +150,45 @@ services:
         reservations:
           cpus: "0.15"
           memory: 256M
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - blogdemo-network
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8082:8080"
+    networks:
+      - blogdemo-network
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
 volumes:
   nexus-data:
 networks:
@@ -120,3 +202,4 @@ secrets:
 configs:
   nginx_conf:
     external: true
+```
