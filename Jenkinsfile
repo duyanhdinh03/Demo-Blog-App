@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label 'docker-swarm-agent' 
-    }
+    agent any
 
     environment {
         NEXUS_URL = credentials('nexus-url') 
