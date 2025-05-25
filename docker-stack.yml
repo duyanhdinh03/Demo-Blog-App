@@ -122,7 +122,7 @@ services:
           cpus: "0.75"
           memory: 1.5G
   nginx:
-    image: <nexus-private-ip>:8081/repository/docker-hosted/my-nginx:latest
+    image: ${NEXUS_URL}:8081/repository/docker-hosted/my-nginx:latest
     ports:
       - "80:80"
       - "443:443"
