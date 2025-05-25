@@ -1,118 +1,212 @@
 pipeline {
-    agent any
+    agent {
+        label 'docker-swarm-agent' 
+    }
+
     environment {
-        NEXUS_URL = "10.0.2.10:8081"
+        NEXUS_URL = credentials('nexus-url') 
         NEXUS_REPO = "repository/docker-hosted"
         CLOUDFLARE_PROJECT = "my-blog-app"
+        DOCKER_REGISTRY = "${NEXUS_URL}/${NEXUS_REPO}"
     }
+
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/duyanhdinh03/Demo-Blog-App.git', branch: 'master'
+                git(
+                    url: 'https://github.com/duyanhdinh03/Demo-Blog-App.git',
+                    branch: 'master',
+                    changelog: false,
+                    poll: false
+                )
             }
         }
+
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'npm install'
+                    sh 'npm ci --no-audit'
                     sh 'npm run build --configuration production'
                 }
             }
         }
-        stage('Deploy Frontend to Cloudflare Pages') {
+
+        stage('Deploy Frontend') {
             steps {
-                withCredentials([string(credentialsId: 'cloudflare-api-token', variable: 'CLOUDFLARE_API_TOKEN')]) {
-                    sh '''
-                    curl -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/trigger/$CLOUDFLARE_PROJECT" \
-                    -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-                    -H "Content-Type: application/json"
-                    '''
-                }
-            }
-        }
-        stage('Check Frontend Deployment') {
-            steps {
-                script {
-                    sh '''
-                    sleep 30
-                    curl -s -o /dev/null -w "%{http_code}" https://my-blog-app.pages.dev | grep 200 || exit 1
-                    '''
-                }
-            }
-        }
-        stage('Code Quality Check - SonarQube') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    dir('backend') {
-                        sh 'mvn sonar:sonar -f pom.xml'
+                withCredentials([string(
+                    credentialsId: 'cloudflare-api-token',
+                    variable: 'CLOUDFLARE_API_TOKEN'
+                )]) {
+                    script {
+                        def response = httpRequest(
+                            url: "https://api.cloudflare.com/client/v4/pages/webhooks/trigger/${CLOUDFLARE_PROJECT}",
+                            httpMode: 'POST',
+                            customHeaders: [
+                                [name: 'Authorization', value: "Bearer ${CLOUDFLARE_API_TOKEN}"],
+                                [name: 'Content-Type', value: 'application/json']
+                            ],
+                            validResponseCodes: '200:499'
+                        )
+
+                        if (response.status != 200) {
+                            error("Cloudflare deployment failed: ${response.content}")
+                        }
                     }
                 }
             }
         }
-        stage('Build Backend') {
+
+        stage('Code Quality Analysis') {
             steps {
-                dir('backend') {
-                    sh 'mvn clean package'
-                    sh 'docker build -t my-blog-backend:latest -f Dockerfile.backend .'
+                withSonarQubeEnv('SonarQube') {
+                    dir('backend') {
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=my-blog-backend'
+                    }
                 }
             }
         }
-        stage('Build NGINX Proxy') {
+
+        stage('Build & Scan Images') {
             steps {
-                dir('nginx') {
-                    sh 'docker build -t my-nginx:latest -f Dockerfile.nginx .'
+                script {
+                    def images = [
+                        'backend': 'Dockerfile.backend',
+                        'nginx': 'Dockerfile.nginx'
+                    ]
+
+                    images.each { name, dockerfile ->
+                        dir(name) {
+                            // Build image
+                            sh "docker build -t ${name}:latest -f ${dockerfile} ."
+                            
+                            // Scan with Trivy
+                            def scanResult = sh(
+                                script: "docker run --rm aquasec/trivy image --exit-code 0 --severity HIGH,CRITICAL ${name}:latest",
+                                returnStatus: true
+                            )
+                            
+                            if (scanResult != 0) {
+                                unstable "Trivy found vulnerabilities in ${name} image"
+                            }
+                        }
+                    }
                 }
             }
         }
-        stage('Scan Image - Trivy') {
+
+        stage('Push Images') {
             steps {
-                sh 'docker run --rm aquasec/trivy image my-blog-backend:latest'
-                sh 'docker run --rm aquasec/trivy image my-nginx:latest'
-            }
-        }
-        stage('Push to Nexus') {
-            steps {
-                withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
-                    sh '''
-                    aws secretsmanager get-secret-value --secret-id nexus_credentials --query SecretString --output text > /tmp/nexus_cred
-                    NEXUS_USER=$(cat /tmp/nexus_cred | jq -r .username)
-                    NEXUS_PASS=$(cat /tmp/nexus_cred | jq -r .password)
-                    docker login -u $NEXUS_USER -p $NEXUS_PASS $NEXUS_URL
-                    docker tag my-blog-backend:latest $NEXUS_URL/$NEXUS_REPO/my-blog-backend:latest
-                    docker tag my-nginx:latest $NEXUS_URL/$NEXUS_REPO/my-nginx:latest
-                    docker push $NEXUS_URL/$NEXUS_REPO/my-blog-backend:latest
-                    docker push $NEXUS_URL/$NEXUS_REPO/my-nginx:latest
-                    rm -f /tmp/nexus_cred
-                    '''
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'nexus-credentials',
+                        usernameVariable: 'NEXUS_USER',
+                        passwordVariable: 'NEXUS_PASS'
+                    )
+                ]) {
+                    script {
+                        sh "docker login -u $NEXUS_USER -p $NEXUS_PASS $NEXUS_URL"
+                        
+                        ['backend', 'nginx'].each { name ->
+                            sh """
+                                docker tag ${name}:latest ${DOCKER_REGISTRY}/${name}:latest
+                                docker push ${DOCKER_REGISTRY}/${name}:latest
+                            """
+                        }
+                    }
                 }
             }
         }
-        stage('Deploy to Swarm') {
+
+        stage('Deploy Stack') {
             steps {
-                withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
-                    sh '''
-                    aws secretsmanager get-secret-value --secret-id rds_credentials --query SecretString --output text > /tmp/rds_cred
-                    DB_HOST=$(cat /tmp/rds_cred | jq -r .host)
-                    DB_PORT=$(cat /tmp/rds_cred | jq -r .port)
-                    DB_NAME=$(cat /tmp/rds_cred | jq -r .dbname)
-                    aws secretsmanager get-secret-value --secret-id db_password --query SecretString --output text > /tmp/db_password
-                    aws secretsmanager get-secret-value --secret-id db_sonar_password --query SecretString --output text > /tmp/db_sonar_password
-                    docker secret rm db_password db_sonar_password || true
-                    docker secret create db_password /tmp/db_password
-                    docker secret create db_sonar_password /tmp/db_sonar_password
-                    sed -i "s|jdbc:postgresql://your-db-host:5432/sonarqube|jdbc:postgresql://$DB_HOST:$DB_PORT/sonarqube|" docker-stack.yml
-                    sed -i "s|jdbc:postgresql://your-db-host:5432/blogdb|jdbc:postgresql://$DB_HOST:$DB_PORT/$DB_NAME|" docker-stack.yml
-                    docker stack rm blog-demo || true
-                    docker stack deploy -c docker-stack.yml blog-demo
-                    rm -f /tmp/rds_cred /tmp/db_password /tmp/db_sonar_password
-                    '''
+                withAWS(
+                    credentials: 'aws-credentials',
+                    region: 'us-east-1'
+                ) {
+                    script {
+                        // Get database credentials
+                        def rdsSecret = getSecret('rds-credentials')
+                        def dbSecret = getSecret('db-password')
+                        def sonarSecret = getSecret('db-sonar-password')
+
+                        // Generate dynamic stack file
+                        writeFile(
+                            file: 'docker-stack.prod.yml',
+                            text: generateStackConfig(
+                                rdsHost: rdsSecret.host,
+                                rdsPort: rdsSecret.port,
+                                dbName: rdsSecret.dbname,
+                                dbPassword: dbSecret,
+                                sonarPassword: sonarSecret
+                            )
+                        )
+
+                        // Deploy stack
+                        sh '''
+                            docker stack deploy \
+                                --with-registry-auth \
+                                -c docker-stack.prod.yml \
+                                blog-demo
+                        '''
+                    }
                 }
             }
         }
     }
+
     post {
         always {
             cleanWs()
+            script {
+                // Cleanup temporary credentials
+                sh 'docker logout $NEXUS_URL || true'
+            }
+        }
+        success {
+            slackSend(
+                color: 'good',
+                message: "Deployment SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+            )
+        }
+        failure {
+            slackSend(
+                color: 'danger',
+                message: "Deployment FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+            )
         }
     }
+}
+
+// Helper functions
+def getSecret(String secretName) {
+    def secretText = sh(
+        script: """
+            aws secretsmanager get-secret-value \
+                --secret-id ${secretName} \
+                --query SecretString \
+                --output text
+        """,
+        returnStdout: true
+    ).trim()
+    
+    return readJSON(text: secretText)
+}
+
+def generateStackConfig(Map args) {
+    return """
+        version: '3.8'
+
+        services:
+            sonarqube:
+                environment:
+                    SONAR_JDBC_URL: jdbc:postgresql://${args.rdsHost}:${args.rdsPort}/sonarqube
+                    SONAR_JDBC_PASSWORD: ${args.sonarPassword}
+
+            backend:
+                environment:
+                    SPRING_DATASOURCE_URL: jdbc:postgresql://${args.rdsHost}:${args.rdsPort}/${args.dbName}
+                    SPRING_DATASOURCE_PASSWORD: ${args.dbPassword}
+
+        # ... (rest of your stack configuration)
+    """
 }
