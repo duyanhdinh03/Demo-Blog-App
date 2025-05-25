@@ -8,6 +8,7 @@ pipeline {
         NEXUS_REPO = "repository/docker-hosted"
         CLOUDFLARE_PROJECT = "my-blog-app"
         DOCKER_REGISTRY = "${NEXUS_URL}/${NEXUS_REPO}"
+        SONARQUBE_TOKEN = credentials('sonarqube-token')
     }
 
     stages {
@@ -50,7 +51,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     dir('backend') {
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=my-blog-backend'
+                        sh "mvn sonar:sonar -Dsonar.projectKey=my-blog-backend -Dsonar.login=${SONARQUBE_TOKEN}"
                     }
                 }
             }
@@ -72,17 +73,16 @@ pipeline {
 
                     images.each { name, dockerfile ->
                         dir(name) {
-                            // Build image
                             sh "docker build -t ${name}:latest -f ${dockerfile} ."
                             
-                            // Scan with Trivy
+                            // Fail pipeline nếu có lỗi CRITICAL
                             def scanResult = sh(
-                                script: "docker run --rm aquasec/trivy image --exit-code 0 --severity HIGH,CRITICAL ${name}:latest",
+                                script: "trivy image --exit-code 1 --severity CRITICAL ${name}:latest",
                                 returnStatus: true
                             )
                             
                             if (scanResult != 0) {
-                                unstable "Trivy found vulnerabilities in ${name} image"
+                                error "Trivy found CRITICAL vulnerabilities in ${name} image"
                             }
                         }
                     }
@@ -117,15 +117,15 @@ pipeline {
             steps {
                 withAWS(
                     credentials: 'aws-credentials',
-                    region: 'us-east-1'
+                    region: 'ap-southeast-1'
                 ) {
                     script {
-                        // Get database credentials
+
                         def rdsSecret = getSecret('rds-credentials')
                         def dbSecret = getSecret('db-password')
                         def sonarSecret = getSecret('db-sonar-password')
 
-                        // Generate dynamic stack file
+
                         writeFile(
                             file: 'docker-stack.prod.yml',
                             text: generateStackConfig(
@@ -133,7 +133,8 @@ pipeline {
                                 rdsPort: rdsSecret.port,
                                 dbName: rdsSecret.dbname,
                                 dbPassword: dbSecret,
-                                sonarPassword: sonarSecret
+                                sonarPassword: sonarSecret,
+                                nexusUrl: env.NEXUS_URL
                             )
                         )
 
@@ -142,7 +143,7 @@ pipeline {
                             docker stack deploy \
                                 --with-registry-auth \
                                 -c docker-stack.prod.yml \
-                                blog-demo
+                                blog-demo-cicd
                         '''
                     }
                 }
@@ -154,7 +155,6 @@ pipeline {
         always {
             cleanWs()
             script {
-                // Cleanup temporary credentials
                 sh 'docker logout $NEXUS_URL || true'
             }
         }
@@ -193,16 +193,63 @@ def generateStackConfig(Map args) {
         version: '3.8'
 
         services:
+            prometheus:
+                image: prom/prometheus
+                volumes:
+                    - prometheus_data:/prometheus
+                ports:
+                    - "9090:9090"
+                networks:
+                    - blogdemo-network
+                deploy:
+                    placement:
+                        constraints: [node.role == manager]
+
+            grafana:
+                image: grafana/grafana
+                ports:
+                    - "3000:3000"
+                networks:
+                    - blogdemo-network
+                deploy:
+                    placement:
+                        constraints: [node.role == manager]
+
             sonarqube:
+                image: sonarqube:community
                 environment:
                     SONAR_JDBC_URL: jdbc:postgresql://${args.rdsHost}:${args.rdsPort}/sonarqube
                     SONAR_JDBC_PASSWORD: ${args.sonarPassword}
+                networks:
+                    - blogdemo-network
+                deploy:
+                    placement:
+                        constraints: [node.role == manager]
 
             backend:
+                image: ${args.nexusUrl}/repository/docker-hosted/my-blog-backend:latest
                 environment:
                     SPRING_DATASOURCE_URL: jdbc:postgresql://${args.rdsHost}:${args.rdsPort}/${args.dbName}
                     SPRING_DATASOURCE_PASSWORD: ${args.dbPassword}
+                networks:
+                    - blogdemo-network
+                deploy:
+                    replicas: 3
 
-        # ... (rest of your stack configuration)
+            nginx:
+                image: ${args.nexusUrl}/repository/docker-hosted/my-nginx:latest
+                ports:
+                    - "80:80"
+                networks:
+                    - blogdemo-network
+                deploy:
+                    replicas: 3
+
+        networks:
+            blogdemo-network:
+                external: true
+
+        volumes:
+            prometheus_data:
     """
 }
