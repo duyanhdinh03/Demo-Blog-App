@@ -71,7 +71,7 @@ services:
     ports:
       - "9000:9000"
     environment:
-      - SONAR_JDBC_URL=jdbc:postgresql://<rds-endpoint>:5432/sonarqube
+      - SONAR_JDBC_URL=jdbc:postgresql://${RDS_ENDPOINT}:5432/sonarqube
       - SONAR_JDBC_USERNAME=admin
       - SONAR_JDBC_PASSWORD=${SONAR_JDBC_PASSWORD}
     secrets:
@@ -93,7 +93,7 @@ services:
           cpus: "0.5"
           memory: 1G
   backend:
-    image: <nexus-private-ip>:8081/repository/docker-hosted/my-blog-backend:latest
+    image: ${NEXUS_URL}:8081/repository/docker-hosted/my-blog-backend:latest
     ports:
       - "8080:8080"
     environment:
