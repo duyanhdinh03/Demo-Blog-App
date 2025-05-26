@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        NEXUS_URL = credentials('nexus-url')
+        NEXUS_URL = getSecret('nexus-url').url
         NEXUS_REPO = "repository/docker-hosted"
         CLOUDFLARE_PROJECT = "my-blog-app"
         DOCKER_REGISTRY = "${NEXUS_URL}/${NEXUS_REPO}"
