@@ -1,9 +1,15 @@
 pipeline {
     agent any
+    environment {
+    GITHUB_CREDENTIALS = credentials('github-api-token') 
+      }
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git {
+                    url: 'https://github.com/duyanhdinh03/Demo-Blog-App',
+                    credentialsId: env.GITHUB_CREDENTIALS  
+                }
             }
         }
         stage('Build Frontend') {
