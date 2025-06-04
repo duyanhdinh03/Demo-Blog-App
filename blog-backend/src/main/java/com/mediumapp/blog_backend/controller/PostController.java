@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "https://jonas-landing.pages.dev")
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
