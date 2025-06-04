@@ -6,10 +6,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git {
-                    url: 'https://github.com/duyanhdinh03/Demo-Blog-App',
-                    credentialsId: env.GITHUB_CREDENTIALS  
-                }
+                git url: 'https://github.com/duyanhdinh03/Demo-Blog-App', credentialsId: 'github-api-token'
             }
         }
         stage('Build Frontend') {
