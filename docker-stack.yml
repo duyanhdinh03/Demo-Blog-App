@@ -10,8 +10,8 @@ services:
           cpus: '0.5'
           memory: 512M
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://blogdemo.123456789012.us-east-1.rds.amazonaws.com:5432/blogdemo
-      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${RDS_ENDPOINT}:5432/blogdemo
+      - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD_FILE=/run/secrets/db_password
     secrets:
       - db_password
