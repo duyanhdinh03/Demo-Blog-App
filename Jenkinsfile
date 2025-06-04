@@ -8,7 +8,8 @@ pipeline {
         stage('Build Frontend') { 
             steps { 
                 dir('blog-frontend') { 
-                    sh 'npm install' sh 'npm run build' 
+                    sh 'npm install' 
+                    sh 'ng build --configuration production' 
                 } 
             } 
         } 
