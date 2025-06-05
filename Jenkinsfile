@@ -1,7 +1,7 @@
 pipeline {
     agent any
     triggers {
-        pollSCM('') // Bắt buộc để kích hoạt GitHub webhook trigger
+        pollSCM('') 
     }
     stages {
         stage('Checkout') {
