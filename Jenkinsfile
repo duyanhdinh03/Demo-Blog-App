@@ -29,7 +29,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('blog-backend') {
-                    sh 'mvn clean package -DskipTests' // Bỏ qua test để tăng tốc, nếu cần
+                    sh 'mvn clean package -DskipTests' 
                 }
             }
         }
