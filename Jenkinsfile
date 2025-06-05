@@ -1,12 +1,14 @@
 pipeline {
     agent any
-    environment {
-    GITHUB_CREDENTIALS = credentials('github-api-token') 
-      }
+    triggers {
+        pollSCM('') // Bắt buộc để kích hoạt GitHub webhook trigger
+    }
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/duyanhdinh03/Demo-Blog-App', credentialsId: 'github-api-token'
+                git url: 'https://github.com/duyanhdinh03/Demo-Blog-App', 
+                     credentialsId: 'github-api-token',
+                     branch: 'master' 
             }
         }
         stage('Build Frontend') {
@@ -64,7 +66,6 @@ pipeline {
         stage('Deploy to Swarm') {
             steps {
                 withCredentials([string(credentialsId: 'rds-endpoint', variable: 'RDS_ENDPOINT')]) {
-                    // SSH vào Swarm Manager để deploy
                     sh """
                     ssh -i /path/to/your-key-pair.pem ubuntu@<manager-public-ip> << 'EOF'
                     export RDS_ENDPOINT=${RDS_ENDPOINT}
@@ -78,6 +79,7 @@ pipeline {
     post {
         always {
             echo 'Pipeline completed. Check results.'
+            cleanWs()
         }
         failure {
             echo 'Pipeline failed. Check logs for details.'
